@@ -14,6 +14,15 @@ import board
 import adafruit_dht
 import cv2
 
+def convert(x):
+    #convert the data for 8G range
+    if x>8:
+        x=x-16
+    else:
+        x=x
+
+    return x
+
 def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD",octoprint_server="http://imi-octopi01.imi.kit.edu/api/job"):
     headers = {'X-Api-Key': api_key}
 
@@ -51,14 +60,14 @@ def save_accelerometer(slicer_settings="unknown",part_name="unknown",directory_p
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    myKx.set_range(myKx.KX134_RANGE16G) # Update the range of the data output.
+    myKx.set_range(myKx.KX134_RANGE8G) # Update the range of the data output.
     myKx.initialize(myKx.DEFAULT_SETTINGS) # Load basic settings
 
     #get the data and savae it with the microseconds to a csv file
     with open(final_path, 'w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
-        writer.writerow(["Velocity_X", "Velocity_Y", "Velocity_Z","Timestamp"])
+        writer.writerow(["Acceleration_X", "Acceleration_Y", "Acceleration_Z","Timestamp"])
         while True:
             myKx.get_accel_data()
             now = datetime.now()
@@ -66,7 +75,7 @@ def save_accelerometer(slicer_settings="unknown",part_name="unknown",directory_p
             # Format datetime with milliseconds
             formatted_datetime = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
-            accelerometer_data=[myKx.kx134_accel.x,myKx.kx134_accel.y,myKx.kx134_accel.z,formatted_datetime]
+            accelerometer_data=[convert(myKx.kx134_accel.x),convert(myKx.kx134_accel.y),convert(myKx.kx134_accel.z),formatted_datetime]
             writer.writerow(accelerometer_data)
             if my_event.is_set():
                 break
