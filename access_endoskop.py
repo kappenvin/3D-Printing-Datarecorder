@@ -6,8 +6,8 @@ if not cap.isOpened():
     print("Error: Could not open camera.")
         
         # Set camera properties (optional)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2592)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1294)
 
 focus_value = 100  # Example value, you may need to experiment with this
 cap.set(cv2.CAP_PROP_FOCUS, focus_value)

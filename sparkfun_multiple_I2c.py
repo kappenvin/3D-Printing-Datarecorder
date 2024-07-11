@@ -46,6 +46,10 @@ import sys
 import threading
 import csv
 from datetime import datetime
+import pdb
+
+print(qwiic_kx13x.__file__)
+pdb.set_trace()
 
 def convert(x):
     #convert the data for 8G range
@@ -59,7 +63,7 @@ def convert(x):
 def runExample():
 
     print("\nSparkFun KX13X Accelerometer Example 1\n")
-    myKx = qwiic_kx13x.QwiicKX134() 
+    myKx = qwiic_kx13x.QwiicKX134(bus=1) 
     
 
     if myKx.connected == False:
@@ -74,16 +78,17 @@ def runExample():
     #print(hex(myKx.address))
 
     
-    myKx.set_range(myKx.KX134_RANGE8G) # Update the range of the data output.
+     # Update the range of the data output.
     myKx.initialize(myKx.DEFAULT_SETTINGS) # Load basic settings 
+    myKx.set_range(myKx.KX134_RANGE8G)
     #put sensor in standby mode to change the output data rate (written in the manual)
     myKx.accel_control(False)
-    myKx.set_output_data_rate(12)
+    myKx.set_output_data_rate(13)
     myKx.accel_control(True)
     time.sleep(1)
     #should be 79 -->01001111
     print(myKx.get_output_data_rate())
-
+    pdb.set_trace()
     #print(hex(myKx.address)
     
     
@@ -186,4 +191,4 @@ def save_accelerometer():
         
 
 if __name__ == '__main__':
-    save_accelerometer()
+    runExample()

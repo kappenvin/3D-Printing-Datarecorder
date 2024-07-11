@@ -25,9 +25,12 @@ def convert(x):
 
 def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD",octoprint_server="http://imi-octopi01.imi.kit.edu/api/job"):
     headers = {'X-Api-Key': api_key}
-
-    response = requests.get(octoprint_server, headers=headers)
-
+    
+    try:
+        response = requests.get(octoprint_server, headers=headers)
+    except: 
+        print('no connection to server')
+    
     if response.status_code == 200:
         data = response.json()
         return True,data
@@ -60,8 +63,12 @@ def save_accelerometer(slicer_settings="unknown",part_name="unknown",directory_p
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    myKx.set_range(myKx.KX134_RANGE8G) # Update the range of the data output.
+     
     myKx.initialize(myKx.DEFAULT_SETTINGS) # Load basic settings
+    myKx.set_range(myKx.KX134_RANGE8G) # Update the range of the data output.
+    myKx.accel_control(False)
+    myKx.set_output_data_rate(11)
+    myKx.accel_control(True)
 
     #get the data and savae it with the microseconds to a csv file
     with open(final_path, 'w', newline='') as file:
@@ -126,6 +133,9 @@ def save_images_picamera(slicer_settings="unknown",part_name="unknown",directory
             pixels.show()
             break
 
+
+    
+    
 def save_temperature(slicer_settings="unknown",part_name="unknown",directory_path="/home/vincent/Documents/Data/Prusa"):
     
     dhtDevice = adafruit_dht.DHT22(board.D12)
@@ -138,10 +148,13 @@ def save_temperature(slicer_settings="unknown",part_name="unknown",directory_pat
     os.makedirs(final_directory,exist_ok=True)
     final_path=os.path.join(final_directory,"temperature_humidity.csv")
     
+    print(final_path)
+    
     with open(final_path, 'w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
         writer.writerow(["Timestamp", "Temperarture", "Humidity"])
+        print("writing")
             
         while True:
             if my_event.is_set():
@@ -151,6 +164,8 @@ def save_temperature(slicer_settings="unknown",part_name="unknown",directory_pat
                 temperature_c = dhtDevice.temperature
                 humidity = dhtDevice.humidity
                 
+                print(humidity)
+                print(final_path)
                 now = datetime.now()
 
                 # Format datetime with milliseconds
@@ -190,18 +205,31 @@ if __name__ == "__main__":
     my_event = threading.Event()# create an Event object
     while True:
         operational,data=get_cotoprint_response()
-        print(operational)
+        
 
         while not operational:
             operational,data=get_cotoprint_response()
+            print("cant connect to octoprint")
 
         state=data["state"]
         name=data["job"]["file"]["name"]
+        
+        # get layer information 
+        api_url="http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
+        _,response= get_cotoprint_response(octoprint_server=api_url)
+        layer=response["layer"]["current"]
+        
+        
 
         # start measurement if the name changes otherwise let the measurement run
-        if name != initial_name and state=="Printing":
-            slicer_settings_name,filename_pre=name.rsplit('_',1) # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
-            filename_final,_=os.path.splitext(filename_pre) # filename.gcode --> filename , .gcode
+        if name != initial_name and state=="Printing" and layer == '1':
+            
+            try:
+                slicer_settings_name,filename_pre = name.rsplit('_',1) # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
+                filename_final,_=os.path.splitext(filename_pre) # filename.gcode --> filename , .gcode
+            except ValueError:
+                slicer_settings_name, filename_pre = name, name
+            
             # clear the event so that the code runs again
             my_event.clear()
             initial_name=name
@@ -209,23 +237,33 @@ if __name__ == "__main__":
             t1=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
             t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
             t3=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
-            t4=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
+            #t4=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
+            #t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             t1.start() 
             t2.start()
             t3.start()
-            t4.start()
+            #t4.start()
+            #t5.start()
         
         elif state!="Printing":
             print ("stop measurement")
             my_event.set()
             try:
-                t1.join()
-                t2.join()
-                t3.join()
-                t4.join()
+                print("wait for process 1")
+                t1.join(timeout=5)
+                print("wait for process 2")
+                t2.join(timeout=5)
+                print("wait for process 3")
+                t3.join(timeout=5)
+                print("wait for process 4")
+                #t4.join()
+                #t5.join()
+                initial_name="start"
             except Exception as e:
                 # Handle any exception that occurs 
                 print(f"An error occurred: {e}")
             
         else:
+            print(f"{state}_{time.time()}")
             pass
+            
