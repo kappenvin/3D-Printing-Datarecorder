@@ -15,7 +15,7 @@ import adafruit_dht
 import cv2
 
 import yaml  # To read the energy related code config file
-import AnatoleCode.tapo_p110_measurement as p110  # Power consumption monitoring
+import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
 
 def convert(x):
