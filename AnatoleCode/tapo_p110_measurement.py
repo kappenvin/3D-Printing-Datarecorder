@@ -1,6 +1,4 @@
 import threading
-import pandas as pd
-from datetime import datetime
 import asyncio
 import csv
 from tapo import ApiClient
@@ -22,6 +20,7 @@ class p110_device:
         """
         Start to record data in "filename"
         """
+        print("Starting energy recording")
         self.stop_event.clear()
         self.t = threading.Thread(target=self.run_async, args=(filename,))
         self.t.start()
@@ -52,7 +51,6 @@ class p110_device:
                 if file.tell() == 0:  # Check if the file is empty to write the header
                     writer.writerow(list(energy_data.keys()))
 
-                print("1 dot = 1 measurement")
                 while not self.stop_event.is_set():
                     energy_usage = await device.get_energy_usage()
                     energy_data = energy_usage.to_dict()
@@ -60,8 +58,6 @@ class p110_device:
                     writer.writerow(list(energy_data.values()))
                     file.flush()
 
-                    print(".", end="", flush=True)
-
                     await asyncio.sleep(interval)
         except Exception as e:
-            print(f"An error occurred during data capture: {e}")
+            print(f"An error occurred during power data capture: {e}")

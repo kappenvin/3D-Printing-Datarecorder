@@ -12,15 +12,12 @@ import os
 import time
 import yaml
 
-from scipy.stats import qmc
-from pyDOE3 import fracfact_by_res
-
 import tapo_p110_measurement as p110
-from octoprint_api import get_octoprint_response
+
 os.chdir('PrintingParametersOptimizer')
 print(os.getcwd())
 # Read config
-with open('config.yaml', 'r') as file:
+with open('AnatoleCode/config.yaml', 'r') as file:
     config = yaml.safe_load(file)
 print(config)
 # Set up data recorders
