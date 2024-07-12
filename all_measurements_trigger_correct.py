@@ -294,6 +294,7 @@ if __name__ == "__main__":
             started_a_while_ago = True
 
         elif state != "Printing":
+            print(state)
             print("stop measurement")
             my_event.set()
             try:
