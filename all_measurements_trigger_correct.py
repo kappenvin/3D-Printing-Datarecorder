@@ -296,6 +296,8 @@ if __name__ == "__main__":
         elif state != "Printing":
             if state == "Printing from SD":
                 print("Currently printing from SD card. Cannot perform measurements.")
+                time.sleep(5)
+                continue
             print("stop measurement")
             my_event.set()
             try:
