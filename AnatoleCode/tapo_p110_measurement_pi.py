@@ -5,13 +5,13 @@ from tapo import ApiClient
 
 
 class p110_device:
-    def __init__(self, tapo_username, tapo_password, ip_address, frequency=1):
+    def __init__(self, tapo_username, tapo_password, ip_address, event, frequency=1):
         self.frequency = frequency
         self.interval = 1 / int(frequency)
         self.tapo_username = tapo_username
         self.tapo_password = tapo_password
         self.ip_address = ip_address
-        self.stop_event = threading.Event()
+        self.stop_event = event
         self.loop = asyncio.new_event_loop()
         self.recording = False
         asyncio.set_event_loop(self.loop)
@@ -21,25 +21,19 @@ class p110_device:
         Start to record data in "filename"
         """
         print("Starting energy recording")
-        self.stop_event.clear()
         self.t = threading.Thread(target=self.run_async, args=(filename,))
         self.t.start()
         self.recording = True
         print("Energy recording started")
 
-    def stop(self):
-        self.stop_event.set()
+    def stop(self, timeout=5):
         try:
-            self.t.join()
+            self.t.join(timeout=timeout)
         except Exception as e:
             print(f"An error occurred: {e}")
         print("Energy recording stopped")
 
-    def run_async(self, filename):
-        self.loop.run_until_complete(self.capture_data(
-            self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
-
-    async def capture_data(self, interval, tapo_username, tapo_password, ip_address, filename):
+    async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
         client = ApiClient(tapo_username, tapo_password)
         device = await client.p110(ip_address)
         try:
@@ -59,5 +53,10 @@ class p110_device:
                     file.flush()
 
                     await asyncio.sleep(interval)
+
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
+
+    def run_async(self, filename):
+        self.loop.run_until_complete(self.capture_power_data(
+            self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
