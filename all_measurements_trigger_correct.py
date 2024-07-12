@@ -19,7 +19,7 @@ import AnatoleCode.tapo_p110_measurement as p110 # Power consumption monitoring
 
 def convert(x):
     #convert the data for 8G range
-    if x>8:
+    if x>8:dhtDevice = adafruit_dht.DHT22(board.D12)
         x=x-16
     else:
         x=x
@@ -106,7 +106,7 @@ def save_images_picamera(slicer_settings="unknown",part_name="unknown",directory
 
     # check if the could be accessed
     picam2 = Picamera2()
-    config=picam2.create_still_configuration(main={"size": (1720, 1280)},controls={"ExposureTime": 3000})
+    config=picam2.create_still_configuration(main={"size": (1720, 1280)},controls={"ExposureTime": 4000})
 
     picam2.configure(config)
     time.sleep(2)
@@ -172,6 +172,7 @@ def save_temperature(slicer_settings="unknown",part_name="unknown",directory_pat
             
         while True:
             if my_event.is_set():
+                dhtDevice.exit()
                 break
             try:
                 # Print the values to the serial port
@@ -196,7 +197,8 @@ def save_temperature(slicer_settings="unknown",part_name="unknown",directory_pat
                 continue
             except Exception as error:
                 dhtDevice.exit()
-                raise error
+                print(error)
+                dhtDevice = adafruit_dht.DHT22(board.D12)
 
             time.sleep(2.0)
 
@@ -251,7 +253,7 @@ if __name__ == "__main__":
         
 
         # start measurement if the name changes otherwise let the measurement run
-        if name != initial_name and state=="Printing" and layer!='_':
+        if name != initial_name and state=="Printing" and layer=='1':
             
             try:
                 slicer_settings_name,filename_pre = name.rsplit('_',1) # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
