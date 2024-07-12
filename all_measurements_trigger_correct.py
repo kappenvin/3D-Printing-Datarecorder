@@ -253,7 +253,7 @@ if __name__ == "__main__":
         if name != initial_name and state == "Printing" and layer != '_':
             if started_a_while_ago:
                 if not layer == "1":
-                    print(f"Early start protection activated | state: {
+                    print(f"Early start protection activated. state: {\
                           state}_{time.time()}")
                     continue
 
