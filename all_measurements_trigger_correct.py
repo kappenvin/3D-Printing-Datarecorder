@@ -187,6 +187,7 @@ def save_temperature(slicer_settings="unknown",part_name="unknown",directory_pat
 
                 data_temp_hum=[formatted_datetime,temperature_c,humidity]
                 writer.writerow(data_temp_hum)
+                file.flush()
 
             except RuntimeError as error:
                 # Errors happen fairly often, DHT's are hard to read, just keep going
@@ -215,6 +216,9 @@ if __name__ == "__main__":
                                 brightness=1.0,
                                 auto_write=False)
     
+    
+    '''
+    
     # Initialize the connection to the power measurement device's api
     with open('AnatoleCode/config.yaml', 'r') as file:
         config = yaml.safe_load(file)
@@ -223,6 +227,7 @@ if __name__ == "__main__":
                                              config["sensor"]["current"]["password"],
                                              config["sensor"]["current"]["ip"],
                                              config["sensor"]["current"]["frequency"])
+    '''
     
     initial_name="start"
     start_time = time.time()
@@ -246,7 +251,7 @@ if __name__ == "__main__":
         
 
         # start measurement if the name changes otherwise let the measurement run
-        if name != initial_name and state=="Printing" and int(layer)>0:
+        if name != initial_name and state=="Printing" and layer!='_':
             
             try:
                 slicer_settings_name,filename_pre = name.rsplit('_',1) # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
@@ -261,7 +266,7 @@ if __name__ == "__main__":
             t1=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
             t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
             t3=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
-            start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa")
+            #start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa")
             t4=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             #t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             t1.start()
@@ -274,7 +279,7 @@ if __name__ == "__main__":
             print ("stop measurement")
             my_event.set()
             try:
-                energy_consumption_sensor.stop()
+                #energy_consumption_sensor.stop()
                 print("wait for process 1")
                 t1.join(timeout=5)
                 print("wait for process 2")

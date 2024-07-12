@@ -20,11 +20,7 @@ print(os.getcwd())
 with open('AnatoleCode/config.yaml', 'r') as file:
     config = yaml.safe_load(file)
 print(config)
-# Set up data recorders
 
-# Ensure the raspberry is working
-input("Please start Raspberry recorder.\n\
-      Press enter to continue...")
 # Initialize the connection to the power measurement device's api
 energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
                                              config["sensor"]["current"]["password"],
