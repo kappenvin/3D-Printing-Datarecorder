@@ -294,7 +294,8 @@ if __name__ == "__main__":
             started_a_while_ago = True
 
         elif state != "Printing":
-            print(state)
+            if state == "Printing from SD":
+                print("Currently printing from SD card. Cannot perform measurements.")
             print("stop measurement")
             my_event.set()
             try:
