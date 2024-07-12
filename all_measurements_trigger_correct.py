@@ -54,7 +54,7 @@ def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="u
     final_directory = os.path.join(part_directory, "Power_Consumption")
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
-
+    # start thread
     energy_consumption_sensor.start(final_path)
 
 
