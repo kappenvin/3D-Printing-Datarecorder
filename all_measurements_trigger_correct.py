@@ -231,8 +231,8 @@ if __name__ == "__main__":
     my_event = threading.Event()  # create an Event object
 
     # Initialize the connection to the power measurement device's api
-    with open('AnatoleCode/config.yaml', 'r') as file:
-        config = yaml.safe_load(file)
+    # with open('AnatoleCode/config.yaml', 'r') as file:
+        # config = yaml.safe_load(file)
 
     while True:
         operational, data = get_cotoprint_response()
@@ -281,7 +281,7 @@ if __name__ == "__main__":
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
             t3 = threading.Thread(target=save_accelerometer, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-            start_saving_power_consumption(
+            #start_saving_power_consumption(
                 energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
@@ -309,7 +309,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                energy_consumption_sensor.stop()
+                #energy_consumption_sensor.stop()
                 # t5.join()
                 initial_name = "start"
             except Exception as e:
