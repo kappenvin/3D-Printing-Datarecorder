@@ -14,7 +14,6 @@ class p110_device:
         self.stop_event = event
         self.recording = False
         self.client = ApiClient(tapo_username, tapo_password)
-        self.loop = None
 
     def start(self, filename):
         """
@@ -58,11 +57,6 @@ class p110_device:
 
     def run_async(self, filename):
         try:
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.loop.run_until_complete(self.capture_power_data(self.interval, filename))
+            asyncio.run(self.capture_power_data(self.interval, filename))
         except Exception as e:
             print(f"An error occurred in the energy event loop: {e}")
-        finally:
-            self.loop.run_until_complete(self.loop.shutdown_asyncgens())  # Ensure all async gens are closed
-            self.loop.close()  # Ensure the loop is closed when done
