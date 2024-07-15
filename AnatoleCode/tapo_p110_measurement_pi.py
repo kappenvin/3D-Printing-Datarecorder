@@ -12,9 +12,9 @@ class p110_device:
         self.tapo_password = tapo_password
         self.ip_address = ip_address
         self.stop_event = event
-        self.loop = asyncio.new_event_loop()
         self.recording = False
         self.client = ApiClient(tapo_username, tapo_password)
+        self.loop = None
 
     def start(self, filename):
         """
@@ -33,7 +33,7 @@ class p110_device:
             print(f"An error occurred while stopping: {e}")
         print("Energy recording stopped")
 
-    async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
+    async def capture_power_data(self, interval, filename):
         try:
             self.device = await self.client.p110(self.ip_address)
             with open(filename, 'a', newline="") as file:
@@ -58,9 +58,9 @@ class p110_device:
 
     def run_async(self, filename):
         try:
+            self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
-            self.loop.run_until_complete(self.capture_power_data(
-                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
+            self.loop.run_until_complete(self.capture_power_data(self.interval, filename))
         except Exception as e:
             print(f"An error occurred in the energy event loop: {e}")
         finally:
