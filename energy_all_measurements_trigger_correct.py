@@ -227,6 +227,7 @@ if __name__ == "__main__":
     initial_name = "start"
     # To avoid issues with new prints detected after the first one
     started_a_while_ago = False
+    stopped_printing_recently = False
     start_time = time.time()
     my_event = threading.Event()  # create an Event object
 
@@ -292,13 +293,21 @@ if __name__ == "__main__":
             t4.start()
             # t5.start()
             started_a_while_ago = True
+            stopped_printing_recently = False
 
         elif state != "Printing":
             if state == "Printing from SD":
                 print("Currently printing from SD card. Cannot perform measurements.")
                 time.sleep(5)
                 continue
-            print("stop measurement")
+
+            # If 
+            elif not started_a_while_ago or stopped_printing_recently:
+                print("Nothing is currently being printed.")
+                time.sleep(5)
+                continue
+
+            print("stopping measurements")
             my_event.set()
             try:
                 print("wait for process 1")
@@ -311,6 +320,7 @@ if __name__ == "__main__":
                 t4.join(timeout=5)
                 # energy_consumption_sensor.stop()
                 # t5.join()
+                stopped_printing_recently = True
                 initial_name = "start"
             except Exception as e:
                 # Handle any exception that occurs
