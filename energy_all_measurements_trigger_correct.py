@@ -231,8 +231,8 @@ if __name__ == "__main__":
     my_event = threading.Event()  # create an Event object
 
     # Initialize the connection to the power measurement device's api
-    with open('AnatoleCode/config.yaml', 'r') as file:
-        config = yaml.safe_load(file)
+    # with open('AnatoleCode/config.yaml', 'r') as file:
+    #     config = yaml.safe_load(file)
 
     while True:
         operational, data = get_cotoprint_response()
@@ -262,11 +262,11 @@ if __name__ == "__main__":
                 # filename.gcode --> filename , .gcode
                 filename_final, _ = os.path.splitext(filename_pre)
 
-                energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
-                                                             config["sensor"]["current"]["password"],
-                                                             config["sensor"]["current"]["ip"],
-                                                             my_event,
-                                                             config["sensor"]["current"]["frequency"])
+                # energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
+                #                                              config["sensor"]["current"]["password"],
+                #                                              config["sensor"]["current"]["ip"],
+                #                                              my_event,
+                #                                              config["sensor"]["current"]["frequency"])
 
             except ValueError:
                 slicer_settings_name, filename_pre = name, name
@@ -281,8 +281,8 @@ if __name__ == "__main__":
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
             t3 = threading.Thread(target=save_accelerometer, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-            start_saving_power_consumption(
-                energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+            # start_saving_power_consumption(
+            #     energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
@@ -309,7 +309,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                energy_consumption_sensor.stop()
+                # energy_consumption_sensor.stop()
                 # t5.join()
                 initial_name = "start"
             except Exception as e:
