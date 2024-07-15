@@ -27,11 +27,10 @@ class p110_device:
         print("Energy recording started")
 
     def stop(self, timeout=5):
-        self.stop_event.set()  # Set the event to stop the loop
         try:
             self.t.join(timeout=timeout)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred while stopping: {e}")
         print("Energy recording stopped")
 
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
