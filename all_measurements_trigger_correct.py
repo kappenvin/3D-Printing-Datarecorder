@@ -14,14 +14,14 @@ import board
 import adafruit_dht
 import cv2
 
-import yaml  # To read the energy related code config file
-import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
-
+import yaml # To read the energy related code config file
+#import AnatoleCode.tapo_p110_measurement as p110 # Power consumption monitoring
 
 def convert(x):
-    # convert the data for 8G range
-    if x > 8:
-        x = x-16
+    #convert the data for 8G range
+    if x>8:
+        x=x-16
+
     else:
         x = x
 

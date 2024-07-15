@@ -41,8 +41,9 @@ picam2.set_controls({"FrameDurationLimits": (10000, 10000)})  # For 90fps, frame
 
 picam2.start_preview(Preview.QTGL)
 picam2.start()
-time.sleep(100)
+time.sleep(10)
 
 pixels.fill(0)
+pixels.show()
 
 time.sleep(4)
