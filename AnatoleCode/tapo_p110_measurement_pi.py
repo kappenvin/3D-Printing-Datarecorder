@@ -14,6 +14,8 @@ class p110_device:
         self.stop_event = event
         self.loop = asyncio.new_event_loop()
         self.recording = False
+        self.client = ApiClient(tapo_username, tapo_password)
+        self.device = self.client.p110(self.ip_address)
         asyncio.set_event_loop(self.loop)
 
     def start(self, filename):
@@ -27,6 +29,7 @@ class p110_device:
         print("Energy recording started")
 
     def stop(self, timeout=5):
+        self.stop_event.set()  # Set the event to stop the loop
         try:
             self.t.join(timeout=timeout)
         except Exception as e:
@@ -34,19 +37,17 @@ class p110_device:
         print("Energy recording stopped")
 
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
-        client = ApiClient(tapo_username, tapo_password)
-        device = await client.p110(ip_address)
         try:
             with open(filename, 'a', newline="") as file:
                 writer = csv.writer(file)
-                energy_usage = await device.get_energy_usage()
+                energy_usage = await self.device.get_energy_usage()
                 energy_data = energy_usage.to_dict()
 
                 if file.tell() == 0:  # Check if the file is empty to write the header
                     writer.writerow(list(energy_data.keys()))
 
                 while not self.stop_event.is_set():
-                    energy_usage = await device.get_energy_usage()
+                    energy_usage = await self.device.get_energy_usage()
                     energy_data = energy_usage.to_dict()
                     
                     writer.writerow(list(energy_data.values()))
@@ -59,9 +60,11 @@ class p110_device:
 
     def run_async(self, filename):
         try:
+            asyncio.set_event_loop(self.loop)
             self.loop.run_until_complete(self.capture_power_data(
                 self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
         except Exception as e:
             print(f"An error occurred in the energy event loop: {e}")
         finally:
+            self.loop.run_until_complete(self.loop.shutdown_asyncgens())  # Ensure all async gens are closed
             self.loop.close()  # Ensure the loop is closed when done
