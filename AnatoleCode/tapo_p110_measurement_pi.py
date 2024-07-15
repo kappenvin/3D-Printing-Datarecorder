@@ -15,7 +15,7 @@ class P110Device:
     def start(self, filename):
         print("Starting energy recording")
         self.recording = True
-        asyncio.create_task(self.capture_power_data(filename))
+        asyncio.run(self.capture_power_data(filename))
 
     def stop(self):
         self.recording = False
