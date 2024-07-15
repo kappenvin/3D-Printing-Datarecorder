@@ -12,12 +12,12 @@ class P110Device:
         self.ip_address = ip_address
         self.recording = False
 
-    async def start(self, filename):
+    def start(self, filename):
         print("Starting energy recording")
         self.recording = True
-        await asyncio.create_task(self.capture_power_data(filename))
+        asyncio.create_task(self.capture_power_data(filename))
 
-    async def stop(self):
+    def stop(self):
         self.recording = False
 
     async def capture_power_data(self, filename):
