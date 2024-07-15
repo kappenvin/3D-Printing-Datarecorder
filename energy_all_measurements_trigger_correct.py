@@ -266,7 +266,6 @@ if __name__ == "__main__":
                 energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
                                                              config["sensor"]["current"]["password"],
                                                              config["sensor"]["current"]["ip"],
-                                                             my_event,
                                                              config["sensor"]["current"]["frequency"])
 
             except ValueError as e:
