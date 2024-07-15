@@ -46,9 +46,10 @@ class p110_device:
                     writer.writerow(list(energy_data.keys()))
 
                 while not self.stop_event.is_set():
+                    print(threading.current_thread())
                     energy_usage = await device.get_energy_usage()
                     energy_data = energy_usage.to_dict()
-
+                    
                     writer.writerow(list(energy_data.values()))
                     file.flush()
 

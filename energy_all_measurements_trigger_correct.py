@@ -248,7 +248,7 @@ if __name__ == "__main__":
         api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
         _, response = get_cotoprint_response(octoprint_server=api_url)
         layer = response["layer"]["current"]
-
+        print(layer)
         # start measurement if the name changes otherwise let the measurement run
         if name != initial_name and state == "Printing" and layer != '_':
             if started_a_while_ago:
