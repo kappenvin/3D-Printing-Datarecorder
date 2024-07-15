@@ -13,7 +13,7 @@ import sys
 import board
 import adafruit_dht
 import cv2
-
+import asyncio
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
@@ -55,7 +55,7 @@ def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="u
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
     # start thread
-    energy_consumption_sensor.start(final_path)
+    asyncio.run(energy_consumption_sensor.start(final_path))
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
