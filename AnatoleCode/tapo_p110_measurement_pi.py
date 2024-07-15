@@ -15,8 +15,6 @@ class p110_device:
         self.loop = asyncio.new_event_loop()
         self.recording = False
         self.client = ApiClient(tapo_username, tapo_password)
-        self.device = self.client.p110(self.ip_address)
-        asyncio.set_event_loop(self.loop)
 
     def start(self, filename):
         """
@@ -38,6 +36,7 @@ class p110_device:
 
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
         try:
+            self.device = await self.client.p110(self.ip_address)
             with open(filename, 'a', newline="") as file:
                 writer = csv.writer(file)
                 energy_usage = await self.device.get_energy_usage()
