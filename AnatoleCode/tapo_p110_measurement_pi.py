@@ -24,22 +24,24 @@ class P110Device:
 
     async def capture_power_data(self, filename):
         try:
-            async with ApiClient(self.tapo_username, self.tapo_password) as client:
-                while self.recording:
-                    try:
-                        device = await client.p110(self.ip_address)
-                        with open(filename, 'a', newline="") as file:
-                            writer = csv.writer(file)
-                            if file.tell() == 0:  # Check if the file is empty to write the header
-                                writer.writerow(list(device.get_energy_usage().to_dict().keys()))
+            client = ApiClient(self.tapo_username, self.tapo_password)
+            device = await client.p110(self.ip_address)
+            while self.recording:
+                try:
+                    with open(filename, 'a', newline="") as file:
+                        writer = csv.writer(file)
+                        if file.tell() == 0:  # Check if the file is empty to write the header
+                            writer.writerow(list(device.get_energy_usage().to_dict().keys()))
 
-                            energy_data = await device.get_energy_usage().to_dict()
-                            writer.writerow(list(energy_data.values()))
-                            file.flush()
-                    except Exception as e:
-                        print(f"Error during power data capture: {e}")
-                    await asyncio.sleep(self.interval)
+                        energy_data = await device.get_energy_usage().to_dict()
+                        writer.writerow(list(energy_data.values()))
+                        file.flush()
+                except Exception as e:
+                    print(f"Error during power data capture: {e}")
+                await asyncio.sleep(self.interval)
         except Exception as e:
             print(f"Failed to connect to Tapo API: {e}")
         finally:
             print("Stopping power data capture.")
+            await client.close()  # Ensure the connection is properly closed
+

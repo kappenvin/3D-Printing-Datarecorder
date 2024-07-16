@@ -58,7 +58,6 @@ def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="u
     loop.run_until_complete(energy_consumption_sensor.start_recording(final_path))  # Run the start_recording method
     loop.run_forever()  # Keep the loop running
 
-
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
