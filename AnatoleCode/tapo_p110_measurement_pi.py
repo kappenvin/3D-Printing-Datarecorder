@@ -1,7 +1,7 @@
 import asyncio
 import csv
 from tapo import ApiClient
-
+import time
 
 class p110_device:
     def __init__(self, tapo_username, tapo_password, ip_address, event, frequency=1):
@@ -52,7 +52,7 @@ class p110_device:
                     writer.writerow(list(energy_data.values()))
                     file.flush()
 
-                    await asyncio.sleep(interval)
+                    time.sleep(interval)
 
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
