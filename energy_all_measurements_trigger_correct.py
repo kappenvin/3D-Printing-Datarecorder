@@ -45,17 +45,18 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
 
 
 def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
-
     settings_directory = os.path.join(directory_path, slicer_settings)
-    # make directory Data/Anycubic/slicer_settings_standard
     os.makedirs(settings_directory, exist_ok=True)
     part_directory = os.path.join(settings_directory, part_name)
     os.makedirs(part_directory, exist_ok=True)
     final_directory = os.path.join(part_directory, "Power_Consumption")
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
-    # start thread
-    asyncio.run(energy_consumption_sensor.start(final_path))
+    
+    loop = asyncio.new_event_loop()  # Create a new event loop
+    asyncio.set_event_loop(loop)  # Set it as the current event loop
+    loop.run_until_complete(energy_consumption_sensor.start(final_path))  # Run the start method
+    loop.run_forever()  # Keep the loop running
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
