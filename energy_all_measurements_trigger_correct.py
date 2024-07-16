@@ -43,6 +43,11 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
         print('Error:', response.status_code)
         return False, None
 
+def run_asyncio(coro):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(coro)
+    loop.close()
 
 async def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
@@ -286,6 +291,8 @@ if __name__ == "__main__":
                 energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
+            energy_thread = threading.Thread(target=run_asyncio, args=(start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),))
+            energy_thread.start()
             # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             t1.start()
             t2.start()
@@ -318,7 +325,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                asyncio.run(energy_consumption_sensor.stop())
+                energy_thread.join(timeout=5)
                 # t5.join()
                 stopped_printing_recently = True
                 initial_name = "start"
