@@ -55,7 +55,7 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
     # start thread
-    asyncio.run(energy_consumption_sensor.start(final_path))
+    energy_consumption_sensor.start(final_path)
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
@@ -282,8 +282,8 @@ if __name__ == "__main__":
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
             t3 = threading.Thread(target=save_accelerometer, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-            start_saving_power_consumption(
-                energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+            asyncio.run(start_saving_power_consumption(
+                energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
