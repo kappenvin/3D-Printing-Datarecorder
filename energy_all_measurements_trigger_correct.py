@@ -12,7 +12,7 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
-import cv2
+import asyncio
 
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
@@ -55,7 +55,7 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
     # start thread
-    await energy_consumption_sensor.start(final_path)
+    asyncio.run(energy_consumption_sensor.start(final_path))
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                energy_consumption_sensor.stop()
+                asyncio.run(energy_consumption_sensor.stop())
                 # t5.join()
                 stopped_printing_recently = True
                 initial_name = "start"
