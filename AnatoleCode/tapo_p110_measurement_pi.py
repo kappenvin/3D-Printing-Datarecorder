@@ -13,26 +13,27 @@ class p110_device:
         self.ip_address = ip_address
         self.stop_event = event
         self.loop = asyncio.new_event_loop()
-        self.recording = False
         asyncio.set_event_loop(self.loop)
 
-    def start(self, filename):
+    async def start(self, filename):
         """
         Start to record data in "filename"
         """
         print("Starting energy recording")
-        self.t = threading.Thread(target=self.run_async, args=(filename,))
-        self.t.start()
-        self.recording = True
+        
+        self.task = asyncio.create_task(self.capture_power_data(
+                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
+        await self.task
         print("Energy recording started")
 
-    def stop(self, timeout=5):
-        try:
-            self.t.join(timeout=timeout)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        print("Energy recording stopped")
-
+    async def stop(self):
+        if self.task:
+            self.task.cancel()
+            try:
+                await self.task
+            except asyncio.CancelledError:
+                print("Energy recording stopped")
+                
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
         client = ApiClient(tapo_username, tapo_password)
         device = await client.p110(ip_address)
@@ -57,11 +58,11 @@ class p110_device:
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
 
-    def run_async(self, filename):
-        try:
-            self.loop.run_until_complete(self.capture_power_data(
-                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
-        except Exception as e:
-            print(f"An error occurred in the energy event loop: {e}")
-        finally:
-            self.loop.close()  # Ensure the loop is closed when done
+    # def run_async(self, filename):
+    #     try:
+    #         self.loop.run_until_complete(self.capture_power_data(
+    #             self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
+    #     except Exception as e:
+    #         print(f"An error occurred in the energy event loop: {e}")
+    #     finally:
+    #         self.loop.close()  # Ensure the loop is closed when done

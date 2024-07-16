@@ -44,7 +44,7 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
         return False, None
 
 
-def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
+async def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
     # make directory Data/Anycubic/slicer_settings_standard
@@ -55,7 +55,7 @@ def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="u
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
     # start thread
-    energy_consumption_sensor.start(final_path)
+    await energy_consumption_sensor.start(final_path)
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
@@ -282,8 +282,8 @@ if __name__ == "__main__":
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
             t3 = threading.Thread(target=save_accelerometer, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-            # start_saving_power_consumption(
-            #     energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+            start_saving_power_consumption(
+                energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                # energy_consumption_sensor.stop()
+                energy_consumption_sensor.stop()
                 # t5.join()
                 stopped_printing_recently = True
                 initial_name = "start"
