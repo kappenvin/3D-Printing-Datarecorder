@@ -30,10 +30,11 @@ class P110Device:
                 try:
                     with open(filename, 'a', newline="") as file:
                         writer = csv.writer(file)
-                        if file.tell() == 0:  # Check if the file is empty to write the header
-                            writer.writerow(list(device.get_energy_usage().to_dict().keys()))
+                        energy_data = await device.get_energy_usage()
 
-                        energy_data = await device.get_energy_usage().to_dict()
+                        if file.tell() == 0:  # Check if the file is empty to write the header
+                            writer.writerow(list(energy_data.keys()))
+
                         writer.writerow(list(energy_data.values()))
                         file.flush()
                 except Exception as e:
