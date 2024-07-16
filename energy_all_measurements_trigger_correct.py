@@ -55,7 +55,7 @@ def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="u
     
     loop = asyncio.new_event_loop()  # Create a new event loop
     asyncio.set_event_loop(loop)  # Set it as the current event loop
-    loop.run_until_complete(energy_consumption_sensor.start(final_path))  # Run the start method
+    loop.run_until_complete(energy_consumption_sensor.start_recording(final_path))  # Run the start_recording method
     loop.run_forever()  # Keep the loop running
 
 
