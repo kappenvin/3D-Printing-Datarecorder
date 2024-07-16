@@ -12,8 +12,6 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
-import cv2
-import asyncio
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
