@@ -1,48 +1,67 @@
+import threading
 import asyncio
 import csv
 from tapo import ApiClient
 
 
-class P110Device:
-    def __init__(self, tapo_username, tapo_password, ip_address, frequency=1):
+class p110_device:
+    def __init__(self, tapo_username, tapo_password, ip_address, event, frequency=1):
         self.frequency = frequency
         self.interval = 1 / int(frequency)
         self.tapo_username = tapo_username
         self.tapo_password = tapo_password
         self.ip_address = ip_address
+        self.stop_event = event
+        self.loop = asyncio.new_event_loop()
         self.recording = False
+        asyncio.set_event_loop(self.loop)
 
-    async def start_recording(self, filename):
+    def start(self, filename):
+        """
+        Start to record data in "filename"
+        """
         print("Starting energy recording")
+        self.t = threading.Thread(target=self.run_async, args=(filename,))
+        self.t.start()
         self.recording = True
-        await self.capture_power_data(filename)
+        print("Energy recording started")
 
-    def stop(self):
-        self.recording = False
-        loop = asyncio.get_event_loop()
-        loop.stop()
-
-    async def capture_power_data(self, filename):
+    def stop(self, timeout=5):
         try:
-            client = ApiClient(self.tapo_username, self.tapo_password)
-            device = await client.p110(self.ip_address)
-            while self.recording:
-                try:
-                    with open(filename, 'a', newline="") as file:
-                        writer = csv.writer(file)
-                        energy_data = await device.get_energy_usage()
-
-                        if file.tell() == 0:  # Check if the file is empty to write the header
-                            writer.writerow(list(energy_data.keys()))
-
-                        writer.writerow(list(energy_data.values()))
-                        file.flush()
-                except Exception as e:
-                    print(f"Error during power data capture: {e}")
-                await asyncio.sleep(self.interval)
+            self.t.join(timeout=timeout)
         except Exception as e:
-            print(f"Failed to connect to Tapo API: {e}")
-        finally:
-            print("Stopping power data capture.")
-            await client.close()  # Ensure the connection is properly closed
+            print(f"An error occurred: {e}")
+        print("Energy recording stopped")
 
+    async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
+        client = ApiClient(tapo_username, tapo_password)
+        device = await client.p110(ip_address)
+        try:
+            with open(filename, 'a', newline="") as file:
+                writer = csv.writer(file)
+                energy_usage = await device.get_energy_usage()
+                energy_data = energy_usage.to_dict()
+
+                if file.tell() == 0:  # Check if the file is empty to write the header
+                    writer.writerow(list(energy_data.keys()))
+
+                while not self.stop_event.is_set():
+                    energy_usage = await device.get_energy_usage()
+                    energy_data = energy_usage.to_dict()
+                    
+                    writer.writerow(list(energy_data.values()))
+                    file.flush()
+
+                    await asyncio.sleep(interval)
+
+        except Exception as e:
+            print(f"An error occurred during power data capture: {e}")
+
+    def run_async(self, filename):
+        try:
+            self.loop.run_until_complete(self.capture_power_data(
+                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
+        except Exception as e:
+            print(f"An error occurred in the energy event loop: {e}")
+        finally:
+            self.loop.close()  # Ensure the loop is closed when done

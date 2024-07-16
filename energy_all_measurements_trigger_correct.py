@@ -12,6 +12,8 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
+import cv2
+
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
@@ -43,18 +45,18 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
 
 
 def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
+
     settings_directory = os.path.join(directory_path, slicer_settings)
+    # make directory Data/Anycubic/slicer_settings_standard
     os.makedirs(settings_directory, exist_ok=True)
     part_directory = os.path.join(settings_directory, part_name)
     os.makedirs(part_directory, exist_ok=True)
     final_directory = os.path.join(part_directory, "Power_Consumption")
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
-    
-    loop = asyncio.new_event_loop()  # Create a new event loop
-    asyncio.set_event_loop(loop)  # Set it as the current event loop
-    loop.run_until_complete(energy_consumption_sensor.start_recording(final_path))  # Run the start_recording method
-    loop.run_forever()  # Keep the loop running
+    # start thread
+    energy_consumption_sensor.start(final_path)
+
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
 
@@ -261,13 +263,13 @@ if __name__ == "__main__":
                 # filename.gcode --> filename , .gcode
                 filename_final, _ = os.path.splitext(filename_pre)
 
-                energy_consumption_sensor = p110.P110Device(config["sensor"]["current"]["username"],
+                energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
                                                              config["sensor"]["current"]["password"],
                                                              config["sensor"]["current"]["ip"],
+                                                             my_event,
                                                              config["sensor"]["current"]["frequency"])
 
-            except ValueError as e:
-                print(f"error:{e}")
+            except ValueError:
                 slicer_settings_name, filename_pre = name, name
 
             # clear the event so that the code runs again
@@ -280,8 +282,8 @@ if __name__ == "__main__":
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
             t3 = threading.Thread(target=save_accelerometer, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-            start_saving_power_consumption(
-                energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+            # start_saving_power_consumption(
+            #     energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
             t4 = threading.Thread(target=save_temperature, args=(
                 slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
             # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
@@ -316,7 +318,7 @@ if __name__ == "__main__":
                 t3.join(timeout=5)
                 print("wait for process 4")
                 t4.join(timeout=5)
-                energy_consumption_sensor.stop()
+                # energy_consumption_sensor.stop()
                 # t5.join()
                 stopped_printing_recently = True
                 initial_name = "start"
