@@ -55,7 +55,7 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
     # start thread
-    energy_consumption_sensor.start(final_path)
+    await energy_consumption_sensor.start(final_path)
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
