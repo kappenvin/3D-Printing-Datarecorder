@@ -1,7 +1,6 @@
 import asyncio
 import csv
 from tapo import ApiClient
-import time
 
 class p110_device:
     def __init__(self, tapo_username, tapo_password, ip_address, event, frequency=1):
@@ -11,7 +10,7 @@ class p110_device:
         self.tapo_password = tapo_password
         self.ip_address = ip_address
         self.stop_event = event
-        self.loop = None  # Déplacer l'initialisation de l'event loop dans la méthode start
+        self.loop = None
 
     async def start(self, filename):
         """
@@ -52,15 +51,7 @@ class p110_device:
                     writer.writerow(list(energy_data.values()))
                     file.flush()
 
-                    time.sleep(interval)
+                    await asyncio.sleep(interval)  # Use asyncio.sleep instead of time.sleep
 
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
-    # def run_async(self, filename):
-    #     try:
-    #         self.loop.run_until_complete(self.capture_power_data(
-    #             self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
-    #     except Exception as e:
-    #         print(f"An error occurred in the energy event loop: {e}")
-    #     finally:
-    #         self.loop.close()  # Ensure the loop is closed when done
