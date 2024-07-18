@@ -52,7 +52,7 @@ class p110_device:
                     writer.writerow(list(energy_data.values()))
                     file.flush()
 
-                    time.sleep(interval)
+                    await asyncio.sleep(interval)
 
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
