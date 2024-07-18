@@ -279,7 +279,7 @@ if __name__ == "__main__":
                                                                 config["sensor"]["current"]["frequency"])
 
                 except ValueError:
-                    slicer_settings_name, filename_pre = name, name
+                    slicer_settings_name, filename_pre, filename_final = name, name, name
 
                 # clear the event so that the code runs again
                 my_event.clear()
