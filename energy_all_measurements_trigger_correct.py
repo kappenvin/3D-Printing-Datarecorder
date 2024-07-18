@@ -283,12 +283,12 @@ if __name__ == "__main__":
                 loop = asyncio.get_event_loop()
             
                 await asyncio.gather(
-                    asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
-                    asyncio.to_thread(save_images_picamera(slicer_settings_name, filename_final)),
-                    asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
-                    asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
-                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    )
+                    asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
+                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+                )
                 
                 started_a_while_ago = True
                 stopped_printing_recently = False
