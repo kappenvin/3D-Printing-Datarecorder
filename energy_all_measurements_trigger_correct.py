@@ -45,12 +45,6 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
         print('Error:', response.status_code)
         return False, None
 
-def run_asyncio(coro):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(coro)
-    loop.close()
-
 async def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
@@ -241,7 +235,6 @@ if __name__ == "__main__":
         # To avoid issues with new prints detected after the first one
         started_a_while_ago = False
         stopped_printing_recently = False
-        start_time = time.time()
         initial_name = "start"
         while True:
             operational, data = get_cotoprint_response()
@@ -296,24 +289,7 @@ if __name__ == "__main__":
                     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
                     asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
                 )
-                # t1 = threading.Thread(target=save_images_picamera, args=(
-                #     slicer_settings_name, filename_final,))  # create t1 thread
-                # t2 = threading.Thread(target=save_accelerometer, args=(
-                #     slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1))
-                # t3 = threading.Thread(target=save_accelerometer, args=(
-                #     slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5))
-                # asyncio.run(start_saving_power_consumption(
-                #     energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
-                # t4 = threading.Thread(target=save_temperature, args=(
-                #     slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
-                # energy_thread = threading.Thread(target=run_asyncio, args=(start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),))
-                # energy_thread.start()
-                # t5=threading.Thread(target = save_endoskop,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
-                # t1.start()
-                # t2.start()
-                # t3.start()
-                # t4.start()
-                # t5.start()
+                
                 started_a_while_ago = True
                 stopped_printing_recently = False
 
@@ -331,17 +307,6 @@ if __name__ == "__main__":
 
                 print("stopping measurements")
                 my_event.set()
-                # try:
-                    # print("wait for process 1")
-                    # t1.join(timeout=5)
-                    # print("wait for process 2")
-                    # t2.join(timeout=5)
-                    # print("wait for process 3")
-                    # t3.join(timeout=5)
-                    # print("wait for process 4")
-                    # t4.join(timeout=5)
-                    # energy_thread.join(timeout=5)
-                    # # t5.join()
                 stopped_printing_recently = True
                 initial_name = "start"
                 await asyncio.sleep(5)
@@ -351,6 +316,5 @@ if __name__ == "__main__":
 
             else:
                 print(f"state: {state}_{time.time()}")
-                await asyncio.sleep(5)
 
 asyncio.run(main_loop())
