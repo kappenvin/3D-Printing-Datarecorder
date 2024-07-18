@@ -65,7 +65,7 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     await energy_consumption_sensor.start(final_path)
 
 
-def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
+async def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
     # make directory Data/Anycubic/slicer_settings_standard
@@ -111,7 +111,6 @@ def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory
             accelerometer_data = [convert(myKx.kx134_accel.x), convert(
                 myKx.kx134_accel.y), convert(myKx.kx134_accel.z), formatted_datetime]
             writer.writerow(accelerometer_data)
-            asyncio.sleep(1)
 
 async def save_images_picamera(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
