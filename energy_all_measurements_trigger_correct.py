@@ -243,19 +243,18 @@ if __name__ == "__main__":
                                                                 config["sensor"]["current"]["frequency"])
         while True:
             operational, data = get_cotoprint_response()
-
+            print("Got octoprint response")
             while not operational:
                 operational, data = get_cotoprint_response()
                 print("cant connect to octoprint")
 
             state = data["state"]
             name = data["job"]["file"]["name"]
-            print(name)
             # get layer information
             api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
             _, response = get_cotoprint_response(octoprint_server=api_url)
             layer = response["layer"]["current"]
-            print(layer)
+
             # start measurement if the name changes otherwise let the measurement run
             if name != initial_name and state == "Printing" and layer != '_':
                 if started_a_while_ago:
@@ -280,7 +279,6 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name
                 print("start measurements")
-                loop = asyncio.get_event_loop()
             
                 await asyncio.gather(
                     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
@@ -288,8 +286,10 @@ if __name__ == "__main__":
                     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
                     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
                     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+                    return_exceptions = True
                 )
-                
+
+                print("Left the coroutines execution")
                 started_a_while_ago = True
                 stopped_printing_recently = False
 
