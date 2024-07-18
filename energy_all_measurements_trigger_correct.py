@@ -65,7 +65,7 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     await energy_consumption_sensor.start(final_path)
 
 
-async def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
+def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
     # make directory Data/Anycubic/slicer_settings_standard
@@ -112,7 +112,7 @@ async def save_accelerometer(slicer_settings="unknown", part_name="unknown", dir
                 myKx.kx134_accel.y), convert(myKx.kx134_accel.z), formatted_datetime]
             writer.writerow(accelerometer_data)
 
-async def save_images_picamera(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
+def save_images_picamera(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     # check if the could be accessed
     picam2 = Picamera2()
@@ -120,7 +120,7 @@ async def save_images_picamera(slicer_settings="unknown", part_name="unknown", d
         main={"size": (1720, 1280)}, controls={"ExposureTime": 3000})
 
     picam2.configure(config)
-    await asyncio.sleep(2)
+    time.sleep(2)
     picam2.start()
 
     pixels[1] = 0xFFFFFF
@@ -152,7 +152,7 @@ async def save_images_picamera(slicer_settings="unknown", part_name="unknown", d
         final_path = os.path.join(
             final_directory, current_time+"layer_"+layer+".jpg")
         picam2.capture_file(final_path)
-        await asyncio.sleep(1)
+        time.sleep(1)
         if my_event.is_set():
             picam2.close()
             pixels.fill(0)
@@ -160,7 +160,7 @@ async def save_images_picamera(slicer_settings="unknown", part_name="unknown", d
             break 
 
 
-async def save_temperature(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
+def save_temperature(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     dhtDevice = adafruit_dht.DHT22(board.D12)
 
@@ -204,14 +204,14 @@ async def save_temperature(slicer_settings="unknown", part_name="unknown", direc
             except RuntimeError as error:
                 # Errors happen fairly often, DHT's are hard to read, just keep going
                 print("Error:", error.args[0])
-                await asyncio.sleep(2)
+                time.sleep(2)
                 continue
             except Exception as error:
                 dhtDevice.exit()
                 print(error)
                 dhtDevice = adafruit_dht.DHT22(board.D12)
 
-            await asyncio.sleep(2.0)
+            time.sleep(2)
 
 
 if __name__ == "__main__":
@@ -287,13 +287,13 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name
                 print("start measurements")
-                # loop = asyncio.get_event_loop()
+                loop = asyncio.get_event_loop()
             
                 await asyncio.gather(
                     asyncio.to_thread(save_images_picamera(slicer_settings_name, filename_final)),
                     asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
                     asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
-                    asyncio.to_thread(start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
+                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
                     asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
                 )
                 # t1 = threading.Thread(target=save_images_picamera, args=(
