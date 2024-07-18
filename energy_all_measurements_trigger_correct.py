@@ -111,6 +111,7 @@ def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory
             accelerometer_data = [convert(myKx.kx134_accel.x), convert(
                 myKx.kx134_accel.y), convert(myKx.kx134_accel.z), formatted_datetime]
             writer.writerow(accelerometer_data)
+            asyncio.sleep(1)
 
 async def save_images_picamera(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
@@ -285,7 +286,7 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name
                 print("start measurements")
-                loop = asyncio.get_event_loop()
+                # loop = asyncio.get_event_loop()
             
                 await asyncio.gather(
                     asyncio.to_thread(save_images_picamera(slicer_settings_name, filename_final)),
