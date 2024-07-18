@@ -236,6 +236,11 @@ if __name__ == "__main__":
         started_a_while_ago = False
         stopped_printing_recently = False
         initial_name = "start"
+        energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
+                                                                config["sensor"]["current"]["password"],
+                                                                config["sensor"]["current"]["ip"],
+                                                                my_event,
+                                                                config["sensor"]["current"]["frequency"])
         while True:
             operational, data = get_cotoprint_response()
 
@@ -270,11 +275,6 @@ if __name__ == "__main__":
                     print(e)
                     slicer_settings_name, filename_pre, filename_final = name, name, name
 
-                energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
-                                                                config["sensor"]["current"]["password"],
-                                                                config["sensor"]["current"]["ip"],
-                                                                my_event,
-                                                                config["sensor"]["current"]["frequency"])
 
                 # clear the event so that the code runs again
                 my_event.clear()
@@ -283,12 +283,12 @@ if __name__ == "__main__":
                 loop = asyncio.get_event_loop()
             
                 await asyncio.gather(
+                    asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
                     asyncio.to_thread(save_images_picamera(slicer_settings_name, filename_final)),
                     asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
                     asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
                     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
-                )
+                    )
                 
                 started_a_while_ago = True
                 stopped_printing_recently = False
@@ -299,7 +299,6 @@ if __name__ == "__main__":
                     await asyncio.sleep(5)
                     continue
 
-                # If 
                 elif not started_a_while_ago or stopped_printing_recently:
                     print("Nothing is currently being printed.")
                     await asyncio.sleep(5)
