@@ -13,11 +13,12 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
-
+import logging
 
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
+logging.basicConfig(level=logging.DEBUG)
 
 def convert(x):
     # convert the data for 8G range
@@ -233,11 +234,8 @@ if __name__ == "__main__":
                                    brightness=1.0,
                                    auto_write=False)
 
-    initial_name = "start"
-    # To avoid issues with new prints detected after the first one
-    started_a_while_ago = False
-    stopped_printing_recently = False
-    start_time = time.time()
+
+
     my_event = asyncio.Event()  # create an Event object
 
     # Initialize the connection to the power measurement device's api
@@ -246,6 +244,11 @@ if __name__ == "__main__":
 
      
     async def main_loop():
+        # To avoid issues with new prints detected after the first one
+        started_a_while_ago = False
+        stopped_printing_recently = False
+        start_time = time.time()
+        initial_name = "start"
         while True:
             operational, data = get_cotoprint_response()
 
@@ -255,7 +258,7 @@ if __name__ == "__main__":
 
             state = data["state"]
             name = data["job"]["file"]["name"]
-
+            print(name)
             # get layer information
             api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
             _, response = get_cotoprint_response(octoprint_server=api_url)
@@ -293,6 +296,7 @@ if __name__ == "__main__":
                     await loop.run_in_executor(executor, save_images_picamera_thread, slicer_settings_name, filename_final)
 
                 await asyncio.gather(
+                    save_images_picamera_thread(slicer_settings_name, filename_final),
                     save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
                     save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
                     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),

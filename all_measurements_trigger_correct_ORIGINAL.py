@@ -253,7 +253,7 @@ if __name__ == "__main__":
         
 
         # start measurement if the name changes otherwise let the measurement run
-        if name != initial_name and state=="Printing" and layer=='1':
+        if name != initial_name and state=="Printing" and layer !='_':
             
             try:
                 slicer_settings_name,filename_pre = name.rsplit('_',1) # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
