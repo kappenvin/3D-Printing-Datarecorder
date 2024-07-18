@@ -13,12 +13,12 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
-import logging
+# import logging
 
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 def convert(x):
     # convert the data for 8G range
