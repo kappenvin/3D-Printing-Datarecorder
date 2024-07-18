@@ -112,12 +112,6 @@ def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory
                 myKx.kx134_accel.y), convert(myKx.kx134_accel.z), formatted_datetime]
             writer.writerow(accelerometer_data)
 
-def save_images_picamera_thread(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(save_images_picamera(slicer_settings, part_name, directory_path))
-    loop.close()
-
 async def save_images_picamera(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     # check if the could be accessed
@@ -292,15 +286,13 @@ if __name__ == "__main__":
                 initial_name = name
                 print("start measurements")
                 loop = asyncio.get_event_loop()
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    await loop.run_in_executor(executor, save_images_picamera_thread, slicer_settings_name, filename_final)
-
+            
                 await asyncio.gather(
-                    save_images_picamera_thread(slicer_settings_name, filename_final),
-                    save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                    save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_images_picamera(slicer_settings_name, filename_final)),
+                    asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
+                    asyncio.to_thread(save_accelerometer(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
+                    asyncio.to_thread(start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
+                    asyncio.to_thread(save_temperature(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
                 )
                 # t1 = threading.Thread(target=save_images_picamera, args=(
                 #     slicer_settings_name, filename_final,))  # create t1 thread
