@@ -272,14 +272,16 @@ if __name__ == "__main__":
                     # filename.gcode --> filename , .gcode
                     filename_final, _ = os.path.splitext(filename_pre)
 
-                    energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
+
+                except ValueError as e:
+                    print(e)
+                    slicer_settings_name, filename_pre, filename_final = name, name, name
+
+                energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
                                                                 config["sensor"]["current"]["password"],
                                                                 config["sensor"]["current"]["ip"],
                                                                 my_event,
                                                                 config["sensor"]["current"]["frequency"])
-
-                except ValueError:
-                    slicer_settings_name, filename_pre, filename_final = name, name, name
 
                 # clear the event so that the code runs again
                 my_event.clear()
