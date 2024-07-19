@@ -1,5 +1,5 @@
 import threading
-import pandas as pd
+# import pandas as pd
 from datetime import datetime
 import asyncio
 import csv
