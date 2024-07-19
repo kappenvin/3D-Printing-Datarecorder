@@ -11,27 +11,24 @@ class p110_device:
         self.tapo_password = tapo_password
         self.ip_address = ip_address
         self.stop_event = event
-        self.loop = None  # Déplacer l'initialisation de l'event loop dans la méthode start
 
     async def start(self, filename):
         """
         Start to record data in "filename"
         """
         print("Starting energy recording")
-        self.loop = asyncio.get_event_loop()
-        
-        self.task = self.loop.create_task(self.capture_power_data(
-                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename))
-        await self.task
+        await self.capture_power_data(
+                self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename)
+
         print("Energy recording started")
 
-    async def stop(self):
-        if self.task:
-            self.task.cancel()
-            try:
-                await self.task
-            except asyncio.CancelledError:
-                print("Energy recording stopped")
+    # async def stop(self):
+    #     if self.task:
+    #         self.task.cancel()
+    #         try:
+    #             await self.task
+    #         except asyncio.CancelledError:
+    #             print("Energy recording stopped")
                 
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
         client = ApiClient(tapo_username, tapo_password)
@@ -53,6 +50,8 @@ class p110_device:
                     file.flush()
 
                     await asyncio.sleep(interval)
+
+                print("Energy recording stopped")
 
         except Exception as e:
             print(f"An error occurred during power data capture: {e}")
