@@ -35,7 +35,9 @@ class p110_device:
                     writer.writerow(list(energy_data.keys()))
 
                 while not self.stop_event.is_set():
-                    energy_usage = await device.get_energy_usage()
+                    print("s")
+                    energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.2)
+                    print("r")
                     energy_data = energy_usage.to_dict()
                     
                     writer.writerow(list(energy_data.values()))
