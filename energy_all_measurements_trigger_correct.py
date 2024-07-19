@@ -14,7 +14,7 @@ import sys
 import board
 import adafruit_dht
 import logging
-
+from concurrent.futures import ThreadPoolExecutor
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
@@ -279,13 +279,15 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name
                 print("start measurements")
-            
+                    # Créez un ThreadPoolExecutor
+                executor = ThreadPoolExecutor()
+                loop = asyncio.get_event_loop()
                 await asyncio.gather(
-                    # asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    # asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
-                    # asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                    # asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
+                    loop.run_in_executor(executor, start_saving_power_consumption, energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
                 )
 
 
@@ -315,9 +317,12 @@ if __name__ == "__main__":
 
             else:
                 print(f"state: {state}_{time.time()}")
+                asyncio.sleep(1)
 
 # asyncio.run(main_loop(), debug=True)
 if __name__ == "__main__":
+
+    # Obtenez la boucle d'événements courante
     loop = asyncio.get_event_loop()
     loop.set_debug(True)  # Enable debug
-    loop.run_until_complete(main_loop())
+    loop.run_forever(main_loop())
