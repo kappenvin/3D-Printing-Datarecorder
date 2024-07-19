@@ -24,11 +24,17 @@ class p110_device:
                 
     async def capture_power_data(self, interval, tapo_username, tapo_password, ip_address, filename):
         client = ApiClient(tapo_username, tapo_password)
-        device = await client.p110(ip_address)
+        try:
+            device = await asyncio.wait_for(client.p110(ip_address), timeout=1) 
+        except Exception as e:
+            print(e)
         try:
             with open(filename, 'a', newline="") as file:
                 writer = csv.writer(file)
-                energy_usage = await device.get_energy_usage()
+                try:
+                    energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.2)
+                except Exception as e:
+                    print(e)
                 energy_data = energy_usage.to_dict()
 
                 if file.tell() == 0:  # Check if the file is empty to write the header
