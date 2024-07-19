@@ -17,7 +17,7 @@ class p110_device:
         Start to record data in "filename"
         """
         print("Starting energy recording")
-        await self.capture_power_data(
+        capture_task = await self.capture_power_data(
                 self.interval, self.tapo_username, self.tapo_password, self.ip_address, filename)
 
         print("Energy recording started")
