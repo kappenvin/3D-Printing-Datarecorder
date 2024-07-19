@@ -13,12 +13,12 @@ import neopixel_spi as neopixel
 import sys
 import board
 import adafruit_dht
-import logging
+# import logging
 
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 def convert(x):
     # convert the data for 8G range
@@ -281,10 +281,10 @@ if __name__ == "__main__":
                 print("start measurements")
             
                 await asyncio.gather(
-                    # asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    # asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
-                    # asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                    # asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
+                    asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
                     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
                 )
 
