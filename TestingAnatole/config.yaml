@@ -1,0 +1,21 @@
+experiments:
+  parameter_bounds: 
+    #wall_thickness: [0.6, 1.5] # in mm
+    infill_mass_proportion: [0, 30] # in %
+    printhead_temperature: [190, 230] # in °C
+    buildplate_temperature: [0, 45] # in °C
+    layer_height: [0.1, 0.3] # in mm
+    print_speed: [40, 150] # in mm/s
+
+database:
+  
+sensor:
+  current:
+    frequency: 1
+    username: svenja.hauck@kit.edu
+    password: testpw12
+    ip: 129.13.235.157
+  
+settings:
+  debug: true
+  log_level: INFO
