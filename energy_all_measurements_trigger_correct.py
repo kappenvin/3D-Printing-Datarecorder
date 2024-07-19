@@ -280,13 +280,14 @@ if __name__ == "__main__":
                 initial_name = name
                 print("start measurements")
 
-                await asyncio.gather(
-                    asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                    asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
-                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
-                )
+                # await asyncio.gather(
+                #     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                #     asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
+                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
+                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
+                #     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+                # )
+                
                 async with asyncio.TaskGroup() as tg:
                     task1 = tg.create_task(asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
                     task2 = tg.create_task(asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final)),
