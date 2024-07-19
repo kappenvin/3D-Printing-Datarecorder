@@ -32,7 +32,7 @@ class p110_device:
                 while not self.stop_event.is_set():
                     try:
                         print("s")
-                        energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.2)
+                        energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.1)
                         print("r")
                         energy_data = energy_usage.to_dict()
                         
