@@ -279,17 +279,20 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name
                 print("start measurements")
-                    # Créez un ThreadPoolExecutor
-                executor = ThreadPoolExecutor()
-                loop = asyncio.get_event_loop()
+
                 await asyncio.gather(
                     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
                     asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
                     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
                     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                    loop.run_in_executor(executor, start_saving_power_consumption, energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
                 )
-
+                async with asyncio.TaskGroup() as tg:
+                    task1 = tg.create_task(asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
+                    task2 = tg.create_task(asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final)),
+                    task3 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
+                    task4 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
+                    task5 = tg.create_task(start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"))
 
                 print("Left the coroutines execution")
                 started_a_while_ago = True
