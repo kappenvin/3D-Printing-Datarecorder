@@ -45,7 +45,7 @@ def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint
         print('Error:', response.status_code)
         return False, None
 
-async def start_saving_power_consumption(energy_consumption_sensor, slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
+def get_power_consumption_path(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
 
     settings_directory = os.path.join(directory_path, slicer_settings)
     # make directory Data/Anycubic/slicer_settings_standard
@@ -55,8 +55,8 @@ async def start_saving_power_consumption(energy_consumption_sensor, slicer_setti
     final_directory = os.path.join(part_directory, "Power_Consumption")
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
-    # start thread
-    await energy_consumption_sensor.start(final_path)
+
+    return final_path
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
@@ -277,16 +277,17 @@ if __name__ == "__main__":
 
                 # clear the event so that the code runs again
                 my_event.clear()
-                initial_name = name
-                print("start measurements")
+                initial_name = name                
+                power_consumption_path = get_power_consumption_path(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
 
-                # await asyncio.gather(
-                #     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                #     asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
-                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                #     start_saving_power_consumption(energy_consumption_sensor, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
-                # )
+                print("start measurements")
+                await asyncio.gather(
+                    asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
+                    asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
+                    asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
+                    energy_consumption_sensor.capture_power_data(power_consumption_path)
+                )
 
                 async with asyncio.TaskGroup() as tg:
                     # task1 = tg.create_task(asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
