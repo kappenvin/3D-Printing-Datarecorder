@@ -325,4 +325,5 @@ if __name__ == "__main__":
     # Obtenez la boucle d'événements courante
     loop = asyncio.get_event_loop()
     loop.set_debug(True)  # Enable debug
-    loop.run_forever(main_loop())
+    loop.create_task(main_loop())
+    loop.run_forever()
