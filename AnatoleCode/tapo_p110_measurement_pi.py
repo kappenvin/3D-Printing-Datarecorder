@@ -14,7 +14,7 @@ class p110_device:
         self.stop_event = event
         self.p110 = PyP110.P110(self.ip_address, self.tapo_username, self.tapo_password)
 
-    def capture_power_data(self, filename):
+    async def capture_power_data(self, filename):
         print("Starting energy recording")
 
         # client = ApiClient(self.tapo_username, self.tapo_password)
@@ -45,7 +45,7 @@ class p110_device:
                         file.flush()
                     except Exception as e:
                         print(e)
-                    time.sleep(self.interval)
+                    await asyncio.sleep(self.interval)
                 print("Energy recording stopped")
 
         except Exception as e:

@@ -293,7 +293,7 @@ if __name__ == "__main__":
                     task2 = tg.create_task(asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final)),
                     task3 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
                     task4 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
-                    task5 = tg.create_task(asyncio.to_thread(energy_consumption_sensor.capture_power_data(power_consumption_path)))
+                    task5 = tg.create_task(energy_consumption_sensor.capture_power_data(power_consumption_path))
 
                 print("Left the coroutines execution")
                 started_a_while_ago = True
