@@ -1,6 +1,7 @@
 import asyncio
 import csv
-from tapo import ApiClient
+# from tapo import ApiClient
+from PyP100 import PyP110
 import time
 
 class p110_device:
@@ -11,19 +12,23 @@ class p110_device:
         self.tapo_password = tapo_password
         self.ip_address = ip_address
         self.stop_event = event
+        self.p110 = PyP110.P110(self.ip_address, self.tapo_username, self.tapo_password)
 
     async def capture_power_data(self, filename):
         print("Starting energy recording")
-        client = ApiClient(self.tapo_username, self.tapo_password)
-        device = await client.p110(self.ip_address)
+
+        # client = ApiClient(self.tapo_username, self.tapo_password)
+        # device = await client.p110(self.ip_address)
         try:
             with open(filename, 'a', newline="") as file:
                 writer = csv.writer(file)
                 try:
-                    energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.2)
+                    energy_data = self.p110.getEnergyUsage()
+                    print("energy_usage=",energy_usage)
                 except Exception as e:
                     print(e)
-                energy_data = energy_usage.to_dict()
+                # energy_data = energy_usage.to_dict()
+                print("energy_data=",energy_data)
 
                 if file.tell() == 0:  # Check if the file is empty to write the header
                     writer.writerow(list(energy_data.keys()))
@@ -32,9 +37,9 @@ class p110_device:
                 while not self.stop_event.is_set():
                     try:
                         print("s")
-                        energy_usage = await asyncio.wait_for(device.get_energy_usage(), timeout=0.1)
+                        energy_data = self.p110.getEnergyUsage()
                         print("r")
-                        energy_data = energy_usage.to_dict()
+                        # energy_data = energy_usage.to_dict()
                         
                         writer.writerow(list(energy_data.values()))
                         file.flush()

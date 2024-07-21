@@ -279,7 +279,7 @@ if __name__ == "__main__":
                 my_event.clear()
                 initial_name = name                
                 power_consumption_path = get_power_consumption_path(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
-
+                print(power_consumption_path)
                 print("start measurements")
                 # await asyncio.gather(
                 #     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
