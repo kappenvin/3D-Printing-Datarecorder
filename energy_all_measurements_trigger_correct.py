@@ -209,7 +209,7 @@ def save_temperature(slicer_settings="unknown", part_name="unknown", directory_p
 
 if __name__ == "__main__":
     NUM_PIXELS = 8
-    # PIXEL_ORDER = neopixel.GRB
+    PIXEL_ORDER = neopixel.GRB
     COLORS = (0xFF0000, 0x00FF00, 0x0000FF)
     DELAY = 0.1
 
