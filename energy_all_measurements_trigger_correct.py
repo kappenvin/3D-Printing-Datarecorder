@@ -12,12 +12,12 @@ import board
 import neopixel_spi as neopixel
 import sys
 import adafruit_dht
-import logging
+# import logging
 from concurrent.futures import ThreadPoolExecutor
 import yaml  # To read the energy related code config file
 import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 def convert(x):
     # convert the data for 8G range
@@ -328,6 +328,6 @@ if __name__ == "__main__":
 
     # Obtenez la boucle d'événements courante
     loop = asyncio.get_event_loop()
-    loop.set_debug(True)  # Enable debug
+    # loop.set_debug(True)  # Enable debug
     loop.create_task(main_loop())
     loop.run_forever()
