@@ -135,7 +135,7 @@ def save_images_picamera(slicer_settings="unknown", part_name="unknown", directo
     api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
 
     # get the image and save them
-    while not my_event.is_set:
+    while not my_event.is_set():
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # save the file to the specific directory
@@ -146,6 +146,7 @@ def save_images_picamera(slicer_settings="unknown", part_name="unknown", directo
         picam2.capture_file(final_path)
         time.sleep(1)
     print("EVENT SET")
+    print(my_event)
     # If my_event is set:   
     if my_event.is_set(): 
         print("EVENT SET")
