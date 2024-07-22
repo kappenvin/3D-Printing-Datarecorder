@@ -54,7 +54,7 @@ def get_power_consumption_path(slicer_settings="unknown", part_name="unknown", d
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
 
-    return final_path
+    return str(final_path)
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
