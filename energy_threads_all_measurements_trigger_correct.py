@@ -289,7 +289,13 @@ if __name__ == "__main__":
             t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
 
-            threads = [t0, t1, t2, t3, t4]
+            threads = [
+                       t0,
+                    #    t1,
+                    #    t2,
+                    #    t3,
+                    #    t4
+                       ]
 
             for thread in threads:
                 thread.start()
@@ -325,3 +331,4 @@ if __name__ == "__main__":
 
         else:
             print(f"state: {state}_{time.time()}")
+            pass
