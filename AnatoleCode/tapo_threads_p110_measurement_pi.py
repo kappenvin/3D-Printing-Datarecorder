@@ -14,11 +14,9 @@ class p110_device:
         self.stop_event = event
         self.p110 = PyP110.P110(self.ip_address, self.tapo_username, self.tapo_password)
 
-    async def capture_power_data(self, filename):
+    def capture_power_data(self, filename):
         print("Starting energy recording")
 
-        # client = ApiClient(self.tapo_username, self.tapo_password)
-        # device = await client.p110(self.ip_address)
         try:
             with open(filename, 'a', newline="") as file:
                 writer = csv.writer(file)
@@ -27,8 +25,6 @@ class p110_device:
                     print("energy_data=",energy_data)
                 except Exception as e:
                     print(e)
-                # energy_data = energy_usage.to_dict()
-                
 
                 if file.tell() == 0:  # Check if the file is empty to write the header
                     writer.writerow(list(energy_data.keys()))
@@ -39,13 +35,12 @@ class p110_device:
                         print("s")
                         energy_data = self.p110.getEnergyUsage()
                         print("r")
-                        # energy_data = energy_usage.to_dict()
                         
                         writer.writerow(list(energy_data.values()))
                         file.flush()
                     except Exception as e:
                         print(e)
-                    await asyncio.sleep(self.interval)
+                    time.sleep(self.interval)
                 print("Energy recording stopped")
 
         except Exception as e:

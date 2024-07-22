@@ -285,17 +285,17 @@ if __name__ == "__main__":
             power_consumption_path = get_power_consumption_path(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
             print("start measurements")
 
-            t0=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
-            t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
-            t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
-            t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
+            # t0=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
+            # t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
+            # t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
+            # t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
             t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
 
             threads = [
-                       t0,
-                       t1,
-                       t2,
-                       t3,
+                    #    t0,
+                    #    t1,
+                    #    t2,
+                    #    t3,
                        t4
                        ]
 
