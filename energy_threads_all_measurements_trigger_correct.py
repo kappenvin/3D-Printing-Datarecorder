@@ -54,7 +54,7 @@ def get_power_consumption_path(slicer_settings="unknown", part_name="unknown", d
     os.makedirs(final_directory, exist_ok=True)
     final_path = os.path.join(final_directory, "power_consumption.csv")
 
-    return str(final_path)
+    return final_path
 
 
 def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa", bus=1):
@@ -292,7 +292,7 @@ if __name__ == "__main__":
             # t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
             # t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
             # t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
-            t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
+            t4=threading.Thread(target = energy_sensor.capture_power_data, args=(power_consumption_path,))
 
             threads = [
                     #    t0,
