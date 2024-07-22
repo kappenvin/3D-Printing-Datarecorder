@@ -260,7 +260,7 @@ if __name__ == "__main__":
         layer = response["layer"]["current"]
 
         # start measurement if the name changes otherwise let the measurement run
-        if name != initial_name and state == "Printing" and layer != '_':
+        if name != initial_name and state == "Printing" and layer != '-':
             if started_a_while_ago:
                 if not layer == "1":
                     print(f"Early start protection activated. state: {state}_{time.time()}")
