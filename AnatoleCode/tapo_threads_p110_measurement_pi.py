@@ -32,9 +32,7 @@ class p110_device:
                 print("Energy recording started")
                 while not self.stop_event.is_set():
                     try:
-                        print("s")
                         energy_data = self.p110.getEnergyUsage()
-                        print("r")
                         
                         writer.writerow(list(energy_data.values()))
                         file.flush()
