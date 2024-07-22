@@ -237,11 +237,11 @@ if __name__ == "__main__":
     started_a_while_ago = False
     stopped_printing_recently = False
     initial_name = "start"
-    # energy_sensor = p110.p110_device(config["sensor"]["current"]["username"],
-    #                                                         config["sensor"]["current"]["password"],
-    #                                                         config["sensor"]["current"]["ip"],
-    #                                                         my_event,
-    #                                                         config["sensor"]["current"]["frequency"])
+    energy_sensor = p110.p110_device(config["sensor"]["current"]["username"],
+                                                            config["sensor"]["current"]["password"],
+                                                            config["sensor"]["current"]["ip"],
+                                                            my_event,
+                                                            config["sensor"]["current"]["frequency"])
     # Data logging loop
     while True:
         operational, data = get_octoprint_response()
@@ -286,17 +286,17 @@ if __name__ == "__main__":
             print("start measurements")
 
             t0=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
-            # t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
-            # t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
-            # t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
-            # t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
+            t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
+            t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
+            t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
+            t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
 
             threads = [
                        t0,
-                    #    t1,
-                    #    t2,
-                    #    t3,
-                    #    t4
+                       t1,
+                       t2,
+                       t3,
+                       t4
                        ]
 
             for thread in threads:
