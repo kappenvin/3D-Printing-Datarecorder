@@ -84,7 +84,7 @@ def save_accelerometer(slicer_settings="unknown",part_name="unknown",directory_p
     myKx.set_output_data_rate(11)
     myKx.accel_control(True)
 
-    #get the data and savae it with the microseconds to a csv file
+    #get the data and save it with the microseconds to a csv file
     with open(final_path, 'w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
@@ -135,7 +135,7 @@ def save_images_picamera(slicer_settings="unknown",part_name="unknown",directory
     while True:
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
        
-        # save the file to the speicific directory 
+        # save the file to the specific directory 
         _,response= get_cotoprint_response(octoprint_server=api_url)
         layer=response["layer"]["current"]
         final_path=os.path.join(final_directory,current_time+"layer_"+layer+".jpg")

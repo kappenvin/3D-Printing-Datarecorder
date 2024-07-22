@@ -1,7 +1,7 @@
 import sys
 import time
 import requests
-import asyncio
+import threading
 import concurrent.futures
 from datetime import datetime
 import os
@@ -12,11 +12,12 @@ import board
 import neopixel_spi as neopixel
 import sys
 import adafruit_dht
-# import logging
+
 from concurrent.futures import ThreadPoolExecutor
 import yaml  # To read the energy related code config file
-import AnatoleCode.tapo_p110_measurement_pi as p110  # Power consumption monitoring
+import AnatoleCode.tapo_threads_p110_measurement_pi as p110  # Power consumption monitoring
 
+# import logging # For debugging
 # logging.basicConfig(level=logging.DEBUG)
 
 def convert(x):
@@ -29,7 +30,7 @@ def convert(x):
     return x
 
 
-def get_cotoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint_server="http://imi-octopi01.imi.kit.edu/api/job"):
+def get_octoprint_response(api_key="896D4E06F1454B9CA27511794B2AC7CD", octoprint_server="http://imi-octopi01.imi.kit.edu/api/job"):
     headers = {'X-Api-Key': api_key}
 
     try:
@@ -88,7 +89,7 @@ def save_accelerometer(slicer_settings="unknown", part_name="unknown", directory
     myKx.set_output_data_rate(11)
     myKx.accel_control(True)
 
-    # get the data and savae it with the microseconds to a csv file
+    # get the data and save it with the microseconds to a csv file
     with open(final_path, 'w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
@@ -136,21 +137,21 @@ def save_images_picamera(slicer_settings="unknown", part_name="unknown", directo
     api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
 
     # get the image and save them
-    while True:
+    while not my_event.is_set:
         current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        # save the file to the speicific directory
-        _, response = get_cotoprint_response(octoprint_server=api_url)
+        # save the file to the specific directory
+        _, response = get_octoprint_response(octoprint_server=api_url)
         layer = response["layer"]["current"]
         final_path = os.path.join(
             final_directory, current_time+"layer_"+layer+".jpg")
         picam2.capture_file(final_path)
         time.sleep(1)
-        if my_event.is_set():
-            picam2.close()
-            pixels.fill(0)
-            pixels.show()
-            break 
+    # If my_event is set:    
+    picam2.close()
+    pixels.fill(0)
+    pixels.show()
+            
 
 
 def save_temperature(slicer_settings="unknown", part_name="unknown", directory_path="/home/vincent/Documents/Data/Prusa"):
@@ -171,7 +172,7 @@ def save_temperature(slicer_settings="unknown", part_name="unknown", directory_p
     with open(final_path, 'w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
-        writer.writerow(["Timestamp", "Temperarture", "Humidity"])
+        writer.writerow(["Timestamp", "Temperature", "Humidity"])
         print("writing")
 
         while True:
@@ -208,6 +209,7 @@ def save_temperature(slicer_settings="unknown", part_name="unknown", directory_p
 
 
 if __name__ == "__main__":
+    # Initialisation
     NUM_PIXELS = 8
     PIXEL_ORDER = neopixel.GRB
     COLORS = (0xFF0000, 0x00FF00, 0x0000FF)
@@ -221,113 +223,106 @@ if __name__ == "__main__":
                                    brightness=1.0,
                                    auto_write=False)
 
-
-
-    my_event = asyncio.Event()  # create an Event object
+    my_event = threading.Event()  # create an Event object
 
     # Initialize the connection to the power measurement device's api
     with open('AnatoleCode/config.yaml', 'r') as file:
         config = yaml.safe_load(file)
 
      
-    async def main_loop():
-        # To avoid issues with new prints detected after the first one
-        started_a_while_ago = False
-        stopped_printing_recently = False
-        initial_name = "start"
-        energy_consumption_sensor = p110.p110_device(config["sensor"]["current"]["username"],
-                                                                config["sensor"]["current"]["password"],
-                                                                config["sensor"]["current"]["ip"],
-                                                                my_event,
-                                                                config["sensor"]["current"]["frequency"])
-        while True:
-            operational, data = get_cotoprint_response()
-            print("Got octoprint response")
-            while not operational:
-                operational, data = get_cotoprint_response()
-                print("cant connect to octoprint")
 
-            state = data["state"]
-            name = data["job"]["file"]["name"]
-            # get layer information
-            api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
-            _, response = get_cotoprint_response(octoprint_server=api_url)
-            layer = response["layer"]["current"]
+    # To avoid issues with new prints detected after the first one
+    started_a_while_ago = False
+    stopped_printing_recently = False
+    initial_name = "start"
+    energy_sensor = p110.p110_device(config["sensor"]["current"]["username"],
+                                                            config["sensor"]["current"]["password"],
+                                                            config["sensor"]["current"]["ip"],
+                                                            my_event,
+                                                            config["sensor"]["current"]["frequency"])
+    # Data logging loop
+    while True:
+        operational, data = get_octoprint_response()
+        print("Got octoprint response")
 
-            # start measurement if the name changes otherwise let the measurement run
-            if name != initial_name and state == "Printing" and layer != '_':
-                if started_a_while_ago:
-                    if not layer == "1":
-                        print(f"Early start protection activated. state: {state}_{time.time()}")
-                        await asyncio.sleep(1)
-                        continue
+        while not operational:
+            operational, data = get_octoprint_response()
+            print("Can't connect to octoprint")
 
-                try:
-                    # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
-                    slicer_settings_name, filename_pre = name.rsplit('_', 1)
-                    # filename.gcode --> filename , .gcode
-                    filename_final, _ = os.path.splitext(filename_pre)
+        state = data["state"]
+        name = data["job"]["file"]["name"]
 
+        # get layer information
+        api_url = "http://imi-octopi01.imi.kit.edu//plugin/DisplayLayerProgress/values"
+        _, response = get_octoprint_response(octoprint_server=api_url)
+        layer = response["layer"]["current"]
 
-                except ValueError as e:
-                    print(e)
-                    slicer_settings_name, filename_pre, filename_final = name, name, name
-
-
-                # clear the event so that the code runs again
-                my_event.clear()
-                initial_name = name                
-                power_consumption_path = get_power_consumption_path(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
-                print(power_consumption_path)
-                print("start measurements")
-                # await asyncio.gather(
-                #     asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa"),
-                #     asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final),
-                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1),
-                #     asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5),
-                #     energy_consumption_sensor.capture_power_data(power_consumption_path)
-                # )
-
-                async with asyncio.TaskGroup() as tg:
-                    task1 = tg.create_task(asyncio.to_thread(save_temperature, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")),
-                    task2 = tg.create_task(asyncio.to_thread(save_images_picamera, slicer_settings_name, filename_final)),
-                    task3 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 1)),
-                    task4 = tg.create_task(asyncio.to_thread(save_accelerometer, slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa", 5)),
-                    task5 = tg.create_task(energy_consumption_sensor.capture_power_data(power_consumption_path))
-
-                print("Left the coroutines execution")
-                started_a_while_ago = True
-                stopped_printing_recently = False
-
-            elif state != "Printing":
-                if state == "Printing from SD":
-                    print("Currently printing from SD card. Cannot perform measurements.")
-                    await asyncio.sleep(5)
+        # start measurement if the name changes otherwise let the measurement run
+        if name != initial_name and state == "Printing" and layer != '_':
+            if started_a_while_ago:
+                if not layer == "1":
+                    print(f"Early start protection activated. state: {state}_{time.time()}")
+                    time.sleep(1)
                     continue
 
-                elif not started_a_while_ago or stopped_printing_recently:
-                    print("Nothing is currently being printed.")
-                    await asyncio.sleep(5)
-                    continue
+            try:
+                # slicer_settings_standard_filename.gcode --> slicer_settings_standard , filename.gcode
+                slicer_settings_name, filename_pre = name.rsplit('_', 1)
+                # filename.gcode --> filename , .gcode
+                filename_final, _ = os.path.splitext(filename_pre)
 
-                print("stopping measurements")
-                my_event.set()
-                stopped_printing_recently = True
-                initial_name = "start"
-                await asyncio.sleep(5)
-                # except Exception as e:
-                #     # Handle any exception that occurs
-                #     print(f"An error occurred: {e}")
 
-            else:
-                print(f"state: {state}_{time.time()}")
-                asyncio.sleep(1)
+            except ValueError as e:
+                print(e)
+                slicer_settings_name, filename_pre, filename_final = name, name, name
 
-# asyncio.run(main_loop(), debug=True)
-if __name__ == "__main__":
 
-    # Obtenez la boucle d'événements courante
-    loop = asyncio.get_event_loop()
-    # loop.set_debug(True)  # Enable debug
-    loop.create_task(main_loop())
-    loop.run_forever()
+            # clear the event so that the code runs again
+            my_event.clear()
+            initial_name = name                
+            power_consumption_path = get_power_consumption_path(slicer_settings_name, filename_final, "/home/vincent/Documents/Data/Prusa")
+            print("start measurements")
+
+            t0=threading.Thread(target = save_images_picamera,args=(slicer_settings_name,filename_final,)) # create t1 thread
+            t1=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",1))
+            t2=threading.Thread(target = save_accelerometer,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa",5))
+            t3=threading.Thread(target = save_temperature,args=(slicer_settings_name,filename_final,"/home/vincent/Documents/Data/Prusa"))
+            t4=threading.Thread(target = energy_sensor.capture_power_data,args=(power_consumption_path))
+
+            threads = [t0, t1, t2, t3, t4]
+
+            for thread in threads:
+                thread.start()
+
+            print("All threads started")
+
+            started_a_while_ago = True
+            stopped_printing_recently = False
+
+        elif state != "Printing":
+            if state == "Printing from SD":
+                print("Currently printing from SD card. Cannot perform measurements.")
+                time.sleep(60)
+                continue
+
+            elif not started_a_while_ago or stopped_printing_recently:
+                print("Nothing is currently being printed.")
+                time.sleep(5)
+                continue
+
+            print("Stopping measurements")
+            my_event.set()
+            stopped_printing_recently = True
+            initial_name = "start"
+            try:
+                for number, thread in enumerate(threads):
+                    print("Waiting for thread", number)
+                    thread.join(timeout=5)
+
+            except Exception as e:
+                # Handle any exception that occurs
+                print(f"An error occurred: {e}")
+
+        else:
+            print(f"state: {state}_{time.time()}")
+            time.sleep(1)
