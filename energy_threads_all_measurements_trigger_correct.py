@@ -234,6 +234,7 @@ if __name__ == "__main__":
      
 
     # To avoid issues with new prints detected after the first one
+    print_paused = False
     started_a_while_ago = False
     stopped_printing_recently = False
     initial_name = "start"
@@ -261,8 +262,8 @@ if __name__ == "__main__":
 
         # start measurement if the name changes otherwise let the measurement run
         if name != initial_name and state == "Printing" and layer != '-':
-            if started_a_while_ago:
-                if not layer == "1":
+            if started_a_while_ago and not print_paused:
+                if layer != "1":
                     print(f"Early start protection activated. state: {state}_{time.time()}")
                     time.sleep(1)
                     continue
@@ -278,7 +279,7 @@ if __name__ == "__main__":
                 print(e)
                 slicer_settings_name, filename_pre, filename_final = name, name, name
 
-
+            print_paused = False
             # clear the event so that the code runs again
             my_event.clear()
             initial_name = name                
@@ -311,6 +312,10 @@ if __name__ == "__main__":
             stopped_printing_recently = False
 
         elif state != "Printing":
+            print(state)
+            if state in ['Pausing', 'Paused']:
+                print_paused = True
+
             if state == "Printing from SD":
                 print("Currently printing from SD card. Cannot perform measurements.")
                 time.sleep(60)
