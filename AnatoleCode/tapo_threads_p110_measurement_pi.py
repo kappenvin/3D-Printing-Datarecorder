@@ -1,4 +1,3 @@
-import asyncio
 import csv
 # from tapo import ApiClient
 from PyP100 import PyP110
